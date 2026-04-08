@@ -1,0 +1,29 @@
+2026-04-08 21:24:05,434 | INFO | werkzeug | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.114.14.175:5000
+2026-04-08 21:24:05,435 | INFO | werkzeug | [33mPress CTRL+C to quit[0m
+2026-04-08 21:24:15,286 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:24:15] "GET / HTTP/1.1" 200 -
+2026-04-08 21:24:16,518 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:24:16] "GET /static/script.js HTTP/1.1" 200 -
+2026-04-08 21:24:16,531 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:24:16] "GET /static/style.css HTTP/1.1" 200 -
+2026-04-08 21:24:16,696 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:24:16] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-08 21:25:06,047 | INFO | werkzeug | 10.114.14.175 - - [08/Apr/2026 21:25:06] "GET / HTTP/1.1" 200 -
+2026-04-08 21:25:06,173 | INFO | werkzeug | 10.114.14.175 - - [08/Apr/2026 21:25:06] "GET /static/style.css HTTP/1.1" 200 -
+2026-04-08 21:25:06,195 | INFO | werkzeug | 10.114.14.175 - - [08/Apr/2026 21:25:06] "GET /static/script.js HTTP/1.1" 200 -
+2026-04-08 21:25:06,304 | INFO | werkzeug | 10.114.14.175 - - [08/Apr/2026 21:25:06] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-08 21:29:04,250 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:29:04] "GET / HTTP/1.1" 200 -
+2026-04-08 21:29:04,265 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:29:04] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-04-08 21:29:04,265 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:29:04] "GET /static/style.css HTTP/1.1" 200 -
+2026-04-08 21:47:56,521 | INFO | __main__ | Encrypt request | message_length=3 demo_mode=True
+2026-04-08 21:48:01,814 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:48:01] "POST /encrypt HTTP/1.1" 200 -
+2026-04-08 21:48:24,765 | INFO | __main__ | Decrypt request | cipher_bytes=3 has_salt=True
+2026-04-08 21:48:30,072 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:48:30] "POST /decrypt HTTP/1.1" 200 -
+2026-04-08 21:49:00,238 | INFO | __main__ | Encrypt request | message_length=3 demo_mode=True
+2026-04-08 21:49:05,508 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:49:05] "POST /encrypt HTTP/1.1" 200 -
+2026-04-08 21:49:22,290 | INFO | __main__ | Decrypt request | cipher_bytes=3 has_salt=True
+2026-04-08 21:49:27,686 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:49:27] "POST /decrypt HTTP/1.1" 200 -
+2026-04-08 21:49:30,785 | INFO | __main__ | Decrypt request | cipher_bytes=3 has_salt=True
+2026-04-08 21:49:36,059 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:49:36] "POST /decrypt HTTP/1.1" 200 -
+2026-04-08 21:49:52,510 | INFO | __main__ | Stego hide | image=1775665192196_Screenshot_2026-03-03_184430.png output=stego_53fcc81b.png
+2026-04-08 21:49:52,512 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:49:52] "POST /hide HTTP/1.1" 200 -
+2026-04-08 21:50:17,090 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:50:17] "POST /extract HTTP/1.1" 200 -

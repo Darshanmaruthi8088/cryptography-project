@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crypto Security Toolkit</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <h1>Crypto Security Toolkit</h1>
+        <p class="sub">
+          Handwritten encryption, steganography, malware heuristics, and educational crypto demos in one lab.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button id="themeToggle" class="secondary" aria-label="Toggle theme">Toggle Theme</button>
+      </div>
+    </header>
+
+    <section class="panel-grid">
+      <article class="card">
+        <h2>Hybrid Text Encryption</h2>
+        <p class="hint" data-tip="Vigenere + XOR + bit rotation with PBKDF2-derived key stream.">
+          Custom Hybrid Cipher
+        </p>
+
+        <label for="msg">Message</label>
+        <textarea id="msg" placeholder="Enter message to encrypt" aria-label="Message to encrypt"></textarea>
+
+        <div class="inline-grid">
+          <div>
+            <label for="encPassword">Password (optional)</label>
+            <input id="encPassword" type="password" placeholder="Optional password">
+          </div>
+          <div>
+            <label for="encIterations">PBKDF2 Iterations</label>
+            <input id="encIterations" type="number" value="3000" min="500" max="100000">
+          </div>
+        </div>
+
+        <label class="checkbox">
+          <input id="encDemoMode" type="checkbox">
+          Show demo mode (step-by-step output)
+        </label>
+
+        <div class="action-row">
+          <button id="encryptBtn">Encrypt</button>
+          <button id="copyEncBtn" class="secondary" data-copy-target="enc">Copy Output</button>
+        </div>
+
+        <div class="progress"><div id="encryptBar"></div></div>
+        <pre id="enc" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>Hybrid Text Decryption</h2>
+        <p class="hint" data-tip="For old ciphertexts, leave salt empty and it uses legacy compatibility mode.">
+          Backward Compatible Decrypt
+        </p>
+
+        <label for="cipher">Cipher (hex)</label>
+        <textarea id="cipher" placeholder="Paste ciphertext in hex"></textarea>
+
+        <div class="inline-grid">
+          <div>
+            <label for="nonce">Nonce</label>
+            <input id="nonce" placeholder="Paste nonce value">
+          </div>
+          <div>
+            <label for="salt">Salt (hex, optional)</label>
+            <input id="salt" placeholder="Salt for new mode">
+          </div>
+        </div>
+
+        <div class="inline-grid">
+          <div>
+            <label for="decPassword">Password (optional)</label>
+            <input id="decPassword" type="password" placeholder="Optional password">
+          </div>
+          <div>
+            <label for="decIterations">PBKDF2 Iterations</label>
+            <input id="decIterations" type="number" value="3000" min="500" max="100000">
+          </div>
+        </div>
+
+        <label class="checkbox">
+          <input id="decDemoMode" type="checkbox">
+          Show demo mode (step-by-step output)
+        </label>
+
+        <div class="action-row">
+          <button id="decryptBtn">Decrypt</button>
+          <button id="copyDecBtn" class="secondary" data-copy-target="dec">Copy Plaintext</button>
+        </div>
+
+        <div class="progress"><div id="decryptBar"></div></div>
+        <pre id="dec" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>Image Steganography</h2>
+        <div id="imageDrop" class="drop-zone" tabindex="0" aria-label="Image upload drop zone">
+          Drag and drop an image or click to select
+        </div>
+        <input type="file" id="img" accept="image/*" aria-label="Image to hide message in">
+        <label for="hiddenmsg">Message to hide</label>
+        <input id="hiddenmsg" type="text" placeholder="Secret message">
+
+        <div class="action-row">
+          <button id="hideBtn">Hide Message</button>
+          <a id="hideDownload" class="download-link" href="#" hidden>Download Stego Image</a>
+        </div>
+        <div class="progress"><div id="hideBar"></div></div>
+        <pre id="hideStatus" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>Extract Hidden Message</h2>
+        <label for="extractimg">Stego image</label>
+        <input type="file" id="extractimg" accept="image/*">
+        <button id="extractBtn">Extract</button>
+        <div class="progress"><div id="extractBar"></div></div>
+        <pre id="extracted" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>GIF Malware Scanner</h2>
+        <div id="gifDrop" class="drop-zone" tabindex="0" aria-label="GIF upload drop zone">
+          Drag and drop a GIF or click to select
+        </div>
+        <input type="file" id="gif" accept=".gif">
+        <button id="scanBtn">Scan GIF</button>
+        <div class="progress"><div id="scanBar"></div></div>
+        <pre id="report" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>File Encryption</h2>
+        <p class="hint" data-tip="Produces .cst JSON payload with nonce, salt, iterations, and cipher.">
+          Encrypt and decrypt files using the same hybrid algorithm.
+        </p>
+
+        <label for="fileEncInput">File to encrypt</label>
+        <input id="fileEncInput" type="file">
+        <label for="filePassword">Password</label>
+        <input id="filePassword" type="password" placeholder="Required password">
+        <div class="action-row">
+          <button id="encryptFileBtn">Encrypt File</button>
+          <a id="encryptFileDownload" class="download-link" href="#" hidden>Download Encrypted File</a>
+        </div>
+
+        <hr>
+
+        <label for="fileDecInput">Encrypted .cst file</label>
+        <input id="fileDecInput" type="file" accept=".cst,.json">
+        <label for="fileDecPassword">Password</label>
+        <input id="fileDecPassword" type="password" placeholder="Required password">
+        <div class="action-row">
+          <button id="decryptFileBtn">Decrypt File</button>
+          <a id="decryptFileDownload" class="download-link" href="#" hidden>Download Decrypted File</a>
+        </div>
+        <pre id="fileStatus" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>Hash and KDF</h2>
+        <label for="hashText">Text for SHA-256</label>
+        <textarea id="hashText" placeholder="Enter text to hash"></textarea>
+        <button id="hashBtn">Compute SHA-256</button>
+        <pre id="hashResult" aria-live="polite"></pre>
+
+        <hr>
+
+        <label for="kdfPassword">PBKDF2 Password</label>
+        <input id="kdfPassword" type="password" placeholder="Password">
+        <div class="inline-grid">
+          <div>
+            <label for="kdfSalt">Salt (optional text or hex)</label>
+            <input id="kdfSalt" placeholder="Optional salt">
+          </div>
+          <div>
+            <label for="kdfIterations">Iterations</label>
+            <input id="kdfIterations" type="number" value="3000" min="100" max="200000">
+          </div>
+        </div>
+        <button id="kdfBtn">Derive Key</button>
+        <pre id="kdfResult" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>RSA Demo and Signatures</h2>
+        <div class="inline-grid">
+          <div>
+            <label for="rsaBits">Key bits</label>
+            <input id="rsaBits" type="number" value="512" min="64" max="2048">
+          </div>
+          <div class="action-end">
+            <button id="rsaGenerateBtn">Generate RSA Keys</button>
+          </div>
+        </div>
+
+        <label for="rsaN">n</label>
+        <textarea id="rsaN" placeholder="Public modulus n"></textarea>
+        <div class="inline-grid">
+          <div>
+            <label for="rsaE">e</label>
+            <input id="rsaE" value="65537">
+          </div>
+          <div>
+            <label for="rsaD">d</label>
+            <input id="rsaD" placeholder="Private exponent d">
+          </div>
+        </div>
+        <label for="rsaMessage">RSA Message</label>
+        <textarea id="rsaMessage" placeholder="Message for RSA operations"></textarea>
+        <div class="action-row">
+          <button id="rsaEncryptBtn">Encrypt</button>
+          <button id="rsaDecryptBtn">Decrypt</button>
+          <button id="rsaSignBtn">Sign</button>
+          <button id="rsaVerifyBtn">Verify</button>
+        </div>
+        <label for="rsaCipherBlocks">Cipher blocks (comma-separated)</label>
+        <textarea id="rsaCipherBlocks" placeholder="Cipher blocks"></textarea>
+        <label for="rsaSignature">Signature</label>
+        <input id="rsaSignature" placeholder="Signature value">
+        <pre id="rsaOutput" aria-live="polite"></pre>
+      </article>
+
+      <article class="card">
+        <h2>Benchmark and Diffie-Hellman</h2>
+        <label for="benchmarkMessage">Benchmark message</label>
+        <input id="benchmarkMessage" placeholder="Text used for timing">
+        <div class="action-row">
+          <button id="benchmarkBtn">Run Benchmark</button>
+          <button id="dhBtn" class="secondary">Simulate Diffie-Hellman</button>
+        </div>
+        <pre id="benchmarkOutput" aria-live="polite"></pre>
+      </article>
+    </section>
+
+    <footer>
+      <p>Cryptography - Steganography - Malware Detection - Educational Security Toolkit</p>
+    </footer>
+  </main>
+
+  <div id="statusModal" class="modal" role="dialog" aria-modal="true" aria-live="assertive" hidden>
+    <div class="modal-card">
+      <h3 id="modalTitle">Status</h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
