@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: crypto-security-toolkit
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: APP_SECRET_KEY
+        generateValue: true
+      - key: PBKDF2_ITERATIONS
+        value: "3000"
+      - key: PYTHON_VERSION
+        value: "3.12.7"
