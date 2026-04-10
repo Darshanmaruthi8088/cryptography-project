@@ -27,3 +27,38 @@
 2026-04-08 21:49:52,510 | INFO | __main__ | Stego hide | image=1775665192196_Screenshot_2026-03-03_184430.png output=stego_53fcc81b.png
 2026-04-08 21:49:52,512 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:49:52] "POST /hide HTTP/1.1" 200 -
 2026-04-08 21:50:17,090 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:50:17] "POST /extract HTTP/1.1" 200 -
+2026-04-08 21:57:44,039 | INFO | werkzeug | 127.0.0.1 - - [08/Apr/2026 21:57:44] "POST /hash/sha256 HTTP/1.1" 200 -
+2026-04-10 17:54:24,398 | INFO | werkzeug | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.114.14.175:5000
+2026-04-10 17:54:24,399 | INFO | werkzeug | [33mPress CTRL+C to quit[0m
+2026-04-10 17:55:12,262 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:12] "GET / HTTP/1.1" 200 -
+2026-04-10 17:55:13,082 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:13] "GET / HTTP/1.1" 200 -
+2026-04-10 17:55:13,373 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:13] "GET / HTTP/1.1" 200 -
+2026-04-10 17:55:15,552 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:15] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-10 17:55:15,625 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:15] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-10 17:55:15,693 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:15] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-10 17:55:15,779 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:15] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-04-10 17:55:15,923 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:15] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-04-10 17:55:16,212 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:16] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-04-10 17:55:16,380 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:55:16] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-10 17:57:57,631 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:57:57] "POST /scan HTTP/1.1" 200 -
+2026-04-10 17:58:34,012 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 17:58:34] "POST /scan HTTP/1.1" 200 -
+2026-04-10 18:00:41,308 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:00:41] "POST /kdf/pbkdf2 HTTP/1.1" 200 -
+2026-04-10 18:02:11,560 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:02:11] "POST /dh/simulate HTTP/1.1" 200 -
+2026-04-10 18:02:32,071 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:02:32] "POST /dh/simulate HTTP/1.1" 200 -
+2026-04-10 18:02:32,587 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:02:32] "POST /dh/simulate HTTP/1.1" 200 -
+2026-04-10 18:02:33,487 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:02:33] "POST /dh/simulate HTTP/1.1" 200 -
+2026-04-10 18:02:34,004 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:02:34] "POST /dh/simulate HTTP/1.1" 200 -
+2026-04-10 18:02:34,503 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:02:34] "POST /dh/simulate HTTP/1.1" 200 -
+2026-04-10 18:03:32,178 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:03:32] "POST /benchmark HTTP/1.1" 200 -
+2026-04-10 18:04:46,008 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:04:46] "POST /rsa/generate HTTP/1.1" 200 -
+2026-04-10 18:05:10,443 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:05:10] "POST /rsa/sign HTTP/1.1" 200 -
+2026-04-10 18:05:30,307 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:05:30] "POST /rsa/verify HTTP/1.1" 200 -
+2026-04-10 18:07:17,788 | INFO | app | Encrypt request | message_length=13 demo_mode=False
+2026-04-10 18:07:19,557 | INFO | app | Decrypt request | cipher_bytes=13 has_salt=True
+2026-04-10 18:10:29,376 | INFO | app | Encrypt request | message_length=13 demo_mode=False
+2026-04-10 18:10:30,113 | INFO | app | Decrypt request | cipher_bytes=13 has_salt=True
+2026-04-10 18:13:01,626 | INFO | app | Encrypt request | message_length=13 demo_mode=False
+2026-04-10 18:13:02,352 | INFO | app | Decrypt request | cipher_bytes=13 has_salt=True
