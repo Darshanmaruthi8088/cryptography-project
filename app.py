@@ -5,7 +5,7 @@ import os
 import time
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_from_directory, url_for
 from werkzeug.exceptions import HTTPException
 from werkzeug.utils import secure_filename
 
@@ -90,6 +90,10 @@ def _require_int(value, field_name: str) -> int:
         return int(str(value).strip())
     except (TypeError, ValueError) as exc:
         raise ValidationError(f"{field_name} must be a valid integer.") from exc
+
+
+def _download_url(filename: str) -> str:
+    return url_for("download", filename=filename)
 
 
 @app.before_request
@@ -216,7 +220,7 @@ def hide():
             "detection_report": detect_before,
             "capacity_chars": capacity,
             "output_file": output_path.name,
-            "download_url": f"/download/{output_path.name}",
+            "download_url": _download_url(output_path.name),
             "duration_ms": duration_ms,
         }
     )
@@ -286,7 +290,7 @@ def encrypt_file():
         {
             "result": "File encrypted successfully",
             "output_file": output_path.name,
-            "download_url": f"/download/{output_path.name}",
+            "download_url": _download_url(output_path.name),
         }
     )
 
@@ -311,7 +315,7 @@ def decrypt_file():
         {
             "result": "File decrypted successfully",
             "output_file": output_path.name,
-            "download_url": f"/download/{output_path.name}",
+            "download_url": _download_url(output_path.name),
         }
     )
 

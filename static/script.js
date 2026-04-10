@@ -79,15 +79,57 @@ async function copyTarget(targetId) {
   }
 }
 
-function renderDownload(linkId, url) {
+function renderDownload(linkId, url, filename = "") {
   const link = el(linkId);
   if (!link) return;
   if (!url) {
     link.hidden = true;
+    link.removeAttribute("href");
+    link.removeAttribute("download");
     return;
   }
   link.href = url;
+  if (filename) {
+    link.download = filename;
+  }
   link.hidden = false;
+}
+
+function parseFilenameFromContentDisposition(headerValue) {
+  if (!headerValue) return "";
+  const utf8Match = headerValue.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match) {
+    try {
+      return decodeURIComponent(utf8Match[1]);
+    } catch {
+      return utf8Match[1];
+    }
+  }
+
+  const classicMatch = headerValue.match(/filename="?([^\";]+)"?/i);
+  return classicMatch ? classicMatch[1] : "";
+}
+
+async function forceFileDownload(url, fallbackFilename) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Download failed with status ${response.status}.`);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition");
+  const filename = parseFilenameFromContentDisposition(disposition) || fallbackFilename || "download.bin";
+  const objectUrl = URL.createObjectURL(blob);
+
+  const tempLink = document.createElement("a");
+  tempLink.href = objectUrl;
+  tempLink.download = filename;
+  tempLink.style.display = "none";
+  document.body.appendChild(tempLink);
+  tempLink.click();
+  tempLink.remove();
+
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
 }
 
 async function encrypt() {
@@ -284,8 +326,17 @@ async function encryptFile() {
   try {
     const data = await requestJson("/encrypt-file", { method: "POST", body: form });
     el("fileStatus").textContent = `${data.result}\nEncrypted file: ${data.output_file}`;
-    renderDownload("encryptFileDownload", data.download_url);
-    showModal("File Encryption", "Encrypted payload generated.");
+    renderDownload("encryptFileDownload", data.download_url, data.output_file);
+
+    try {
+      await forceFileDownload(data.download_url, data.output_file);
+      showModal("File Encryption", "Encrypted payload generated and download started.");
+    } catch (downloadError) {
+      showModal(
+        "File Encryption",
+        `Encrypted payload generated. Use the download link if auto-download is blocked.\n${downloadError.message}`
+      );
+    }
   } catch (error) {
     renderDownload("encryptFileDownload", null);
     showModal("File Encryption Failed", error.message);
@@ -309,8 +360,17 @@ async function decryptFile() {
   try {
     const data = await requestJson("/decrypt-file", { method: "POST", body: form });
     el("fileStatus").textContent = `${data.result}\nDecrypted file: ${data.output_file}`;
-    renderDownload("decryptFileDownload", data.download_url);
-    showModal("File Decryption", "File decrypted successfully.");
+    renderDownload("decryptFileDownload", data.download_url, data.output_file);
+
+    try {
+      await forceFileDownload(data.download_url, data.output_file);
+      showModal("File Decryption", "File decrypted successfully and download started.");
+    } catch (downloadError) {
+      showModal(
+        "File Decryption",
+        `File decrypted successfully. Use the download link if auto-download is blocked.\n${downloadError.message}`
+      );
+    }
   } catch (error) {
     renderDownload("decryptFileDownload", null);
     showModal("File Decryption Failed", error.message);
