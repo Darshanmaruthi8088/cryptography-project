@@ -105,10 +105,11 @@
 
       <article class="card">
         <h2>Image Steganography</h2>
+        <p class="hint">Supported image types: PNG, BMP, GIF, TIF, TIFF, WEBP, JPG, JPEG, JFIF.</p>
         <div id="imageDrop" class="drop-zone" tabindex="0" aria-label="Image upload drop zone">
           Drag and drop an image or click to select
         </div>
-        <input type="file" id="img" accept="image/*" aria-label="Image to hide message in">
+        <input type="file" id="img" accept=".png,.bmp,.gif,.tif,.tiff,.webp,.jpg,.jpeg,.jfif" aria-label="Image to hide message in">
         <label for="hiddenmsg">Message to hide</label>
         <input id="hiddenmsg" type="text" placeholder="Secret message">
 
@@ -122,8 +123,9 @@
 
       <article class="card">
         <h2>Extract Hidden Message</h2>
+        <p class="hint">Supported image types: PNG, BMP, GIF, TIF, TIFF, WEBP, JPG, JPEG, JFIF.</p>
         <label for="extractimg">Stego image</label>
-        <input type="file" id="extractimg" accept="image/*">
+        <input type="file" id="extractimg" accept=".png,.bmp,.gif,.tif,.tiff,.webp,.jpg,.jpeg,.jfif">
         <button id="extractBtn">Extract</button>
         <div class="progress"><div id="extractBar"></div></div>
         <pre id="extracted" aria-live="polite"></pre>

@@ -1,5 +1,7 @@
 import unittest
+from io import BytesIO
 
+from PIL import Image
 from app import app
 
 
@@ -45,7 +47,38 @@ class TestAppAPI(unittest.TestCase):
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
         )
 
+    def test_hide_supports_jpg_images(self):
+        image_bytes = BytesIO()
+        Image.new("RGB", (80, 80), color=(10, 20, 30)).save(image_bytes, format="JPEG")
+        image_bytes.seek(0)
+
+        response = self.client.post(
+            "/hide",
+            data={"message": "hidden", "image": (image_bytes, "sample.jpg")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json["output_file"].endswith(".png"))
+
+    def test_encrypt_file_download_link_works(self):
+        encrypt_response = self.client.post(
+            "/encrypt-file",
+            data={"file": (BytesIO(b"sample payload"), "demo.txt"), "password": "strong-pass"},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(encrypt_response.status_code, 200)
+        download_url = encrypt_response.json["download_url"]
+        self.assertTrue(download_url.startswith("/download/"))
+
+        download_response = self.client.get(download_url)
+        try:
+            self.assertEqual(download_response.status_code, 200)
+            disposition = download_response.headers.get("Content-Disposition", "")
+            self.assertIn("attachment;", disposition)
+            self.assertGreater(len(download_response.data), 0)
+        finally:
+            download_response.close()
+
 
 if __name__ == "__main__":
     unittest.main()
-
