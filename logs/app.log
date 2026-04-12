@@ -76,3 +76,6 @@
 2026-04-10 18:46:36,494 | INFO | app | Encrypt request | message_length=13 demo_mode=False
 2026-04-10 18:46:37,446 | INFO | app | Decrypt request | cipher_bytes=13 has_salt=True
 2026-04-10 18:46:40,722 | INFO | app | Stego hide | image=1775827000713_sample.jpg output=stego_c104df9b.png
+2026-04-10 18:52:30,566 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:52:30] "GET / HTTP/1.1" 200 -
+2026-04-10 18:52:30,653 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:52:30] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-04-10 18:52:30,695 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:52:30] "GET /static/script.js HTTP/1.1" 200 -
