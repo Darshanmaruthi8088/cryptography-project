@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import json
 import os
 import random
@@ -13,7 +14,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 from config import APP_SECRET_KEY, DEFAULT_PBKDF2_ITERATIONS
-from hash_algorithms import hmac_sha256, pbkdf2_sha256
+from hash_algorithms import pbkdf2_sha256
 
 
 class CryptoError(ValueError):
@@ -71,7 +72,7 @@ def _derive_stream_keystream(
     required_len: int,
     iterations: int,
 ) -> bytes:
-    """Derive a fixed PBKDF2 seed and expand it with HMAC counters.
+    """Derive a fixed PBKDF2 seed and expand it with SHA-256 counters.
 
     This keeps PBKDF2 cost stable for large files while still producing
     deterministic keystream bytes tied to password, salt, and nonce.
@@ -89,7 +90,8 @@ def _derive_stream_keystream(
     stream = bytearray()
     counter = 0
     while len(stream) < required_len:
-        stream.extend(hmac_sha256(seed, nonce_bytes + counter.to_bytes(4, byteorder="big")))
+        counter_bytes = counter.to_bytes(4, byteorder="big")
+        stream.extend(hashlib.sha256(seed + nonce_bytes + counter_bytes).digest())
         counter += 1
     return bytes(stream[:required_len])
 
