@@ -1,4 +1,5 @@
 import unittest
+import base64
 
 from config import APP_SECRET_KEY
 from crypto_algorithms import (
@@ -12,6 +13,7 @@ from crypto_algorithms import (
     vigenere_encrypt_bytes,
     xor_cipher_bytes,
 )
+from hash_algorithms import pbkdf2_sha256
 
 
 class TestCryptoAlgorithms(unittest.TestCase):
@@ -56,10 +58,43 @@ class TestCryptoAlgorithms(unittest.TestCase):
     def test_binary_payload_roundtrip(self):
         original = b"\x00\x01\x02HelloFile\xff"
         payload = encrypt_binary_payload(original, password="file-pass", iterations=1800)
+        self.assertEqual(payload["version"], "CST2")
+        self.assertEqual(payload["encoding"], "base64")
+        base64.b64decode(payload["cipher_b64"], validate=True)
         restored = decrypt_binary_payload(payload, password="file-pass")
+        self.assertEqual(restored, original)
+
+    def test_binary_payload_large_roundtrip_default_iterations(self):
+        original = bytes(range(256)) * 128  # 32 KiB
+        payload = encrypt_binary_payload(original, password="large-pass")
+        restored = decrypt_binary_payload(payload, password="large-pass")
+        self.assertEqual(restored, original)
+
+    def test_binary_payload_cst1_backward_compatibility(self):
+        original = b"legacy-payload-for-cst1"
+        nonce = "ABCD1234"
+        salt = bytes.fromhex("0011223344556677")
+        iterations = 900
+        key_stream = pbkdf2_sha256(
+            password=b"legacy-pass",
+            salt=salt,
+            iterations=iterations,
+            dklen=max(len(original), 16),
+        )
+        step1 = vigenere_encrypt_bytes(original, key_stream)
+        step2 = xor_cipher_bytes(step1, nonce.encode("utf-8"))
+        step3 = rotate_bits_bytes(step2)
+
+        payload = {
+            "version": "CST1",
+            "nonce": nonce,
+            "salt": salt.hex(),
+            "iterations": iterations,
+            "cipher_hex": step3.hex(),
+        }
+        restored = decrypt_binary_payload(payload, password="legacy-pass")
         self.assertEqual(restored, original)
 
 
 if __name__ == "__main__":
     unittest.main()
-

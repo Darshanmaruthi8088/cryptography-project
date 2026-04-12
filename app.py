@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import logging
 import os
+import secrets
 import time
+from io import BytesIO
 from pathlib import Path
+from threading import Lock
 
-from flask import Flask, jsonify, render_template, request, send_from_directory, url_for
+from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, url_for
 from werkzeug.exceptions import HTTPException
 from werkzeug.utils import secure_filename
 
@@ -54,6 +57,12 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 app.config["SECRET_KEY"] = APP_SECRET_KEY
 
+IN_MEMORY_DOWNLOAD_TTL_SECONDS = max(int(os.environ.get("IN_MEMORY_DOWNLOAD_TTL_SECONDS", "900")), 60)
+MAX_IN_MEMORY_DOWNLOADS = max(int(os.environ.get("MAX_IN_MEMORY_DOWNLOADS", "25")), 1)
+
+_download_cache_lock = Lock()
+_download_cache: dict[str, dict[str, object]] = {}
+
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 configure_logging(LOG_FOLDER)
@@ -94,6 +103,53 @@ def _require_int(value, field_name: str) -> int:
 
 def _download_url(filename: str) -> str:
     return url_for("download", filename=filename)
+
+
+def _cleanup_download_cache(now: float | None = None) -> None:
+    current_ts = now if now is not None else time.time()
+    expired_tokens = [
+        token
+        for token, metadata in _download_cache.items()
+        if float(metadata.get("expires_at", 0.0)) <= current_ts
+    ]
+    for token in expired_tokens:
+        _download_cache.pop(token, None)
+
+    overflow = len(_download_cache) - MAX_IN_MEMORY_DOWNLOADS
+    if overflow > 0:
+        oldest_tokens = sorted(
+            _download_cache.items(),
+            key=lambda item: float(item[1].get("created_at", current_ts)),
+        )[:overflow]
+        for token, _ in oldest_tokens:
+            _download_cache.pop(token, None)
+
+
+def _store_in_memory_download(payload_bytes: bytes, download_name: str) -> str:
+    now = time.time()
+    safe_download_name = secure_filename(download_name) or "download.bin"
+
+    with _download_cache_lock:
+        _cleanup_download_cache(now)
+        token = secrets.token_urlsafe(18)
+        while token in _download_cache:
+            token = secrets.token_urlsafe(18)
+        _download_cache[token] = {
+            "bytes": payload_bytes,
+            "download_name": safe_download_name,
+            "created_at": now,
+            "expires_at": now + IN_MEMORY_DOWNLOAD_TTL_SECONDS,
+        }
+    return token
+
+
+def _resolve_in_memory_download(token: str) -> tuple[bytes, str] | None:
+    with _download_cache_lock:
+        _cleanup_download_cache()
+        metadata = _download_cache.get(token)
+        if metadata is None:
+            return None
+        return bytes(metadata["bytes"]), str(metadata["download_name"])
 
 
 @app.before_request
@@ -278,19 +334,18 @@ def encrypt_file():
         100_000,
     )
 
-    upload_path = _save_upload(file, UPLOAD_FOLDER)
-    payload = encrypt_binary_payload(upload_path.read_bytes(), password=password, iterations=iterations)
+    payload_bytes = file.read() or b""
+    payload = encrypt_binary_payload(payload_bytes, password=password, iterations=iterations)
     payload["original_filename"] = secure_filename(file.filename) or "file.bin"
 
     out_name = f"{int(time.time())}_{Path(payload['original_filename']).stem}.cst"
-    output_path = OUTPUT_FOLDER / out_name
-    output_path.write_bytes(serialize_encrypted_payload(payload))
+    download_token = _store_in_memory_download(serialize_encrypted_payload(payload), out_name)
 
     return jsonify(
         {
             "result": "File encrypted successfully",
-            "output_file": output_path.name,
-            "download_url": _download_url(output_path.name),
+            "output_file": out_name,
+            "download_url": _download_url(download_token),
         }
     )
 
@@ -302,26 +357,34 @@ def decrypt_file():
         raise ValidationError("Encrypted .cst file is required.")
 
     password = validate_non_empty_text(request.form.get("password"), "password")
-    upload_path = _save_upload(file, UPLOAD_FOLDER)
-    payload = parse_encrypted_payload(upload_path.read_bytes())
+    payload = parse_encrypted_payload(file.read() or b"")
 
     plain_data = decrypt_binary_payload(payload, password=password)
     original_filename = secure_filename(str(payload.get("original_filename") or "decrypted_output.bin"))
     output_name = f"{int(time.time())}_decrypted_{original_filename}"
-    output_path = OUTPUT_FOLDER / output_name
-    output_path.write_bytes(plain_data)
+    download_token = _store_in_memory_download(plain_data, output_name)
 
     return jsonify(
         {
             "result": "File decrypted successfully",
-            "output_file": output_path.name,
-            "download_url": _download_url(output_path.name),
+            "output_file": output_name,
+            "download_url": _download_url(download_token),
         }
     )
 
 
 @app.route("/download/<path:filename>")
 def download(filename: str):
+    cached_download = _resolve_in_memory_download(filename)
+    if cached_download is not None:
+        payload_bytes, download_name = cached_download
+        return send_file(
+            BytesIO(payload_bytes),
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/octet-stream",
+        )
+
     return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
 
 

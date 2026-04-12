@@ -79,3 +79,12 @@
 2026-04-10 18:52:30,566 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:52:30] "GET / HTTP/1.1" 200 -
 2026-04-10 18:52:30,653 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:52:30] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
 2026-04-10 18:52:30,695 | INFO | werkzeug | 127.0.0.1 - - [10/Apr/2026 18:52:30] "GET /static/script.js HTTP/1.1" 200 -
+2026-04-12 15:50:04,045 | INFO | app | Encrypt request | message_length=13 demo_mode=False
+2026-04-12 15:50:04,961 | INFO | app | Decrypt request | cipher_bytes=13 has_salt=True
+2026-04-12 15:50:09,724 | INFO | app | Stego hide | image=1775989209697_sample.jpg output=stego_b2fa651a.png
+2026-04-12 15:56:26,173 | INFO | app | Encrypt request | message_length=13 demo_mode=False
+2026-04-12 15:56:27,111 | INFO | app | Decrypt request | cipher_bytes=13 has_salt=True
+2026-04-12 15:56:30,431 | INFO | app | Stego hide | image=1775989590416_sample.jpg output=stego_89e0e0e6.png
+2026-04-12 16:00:21,467 | INFO | app | Encrypt request | message_length=13 demo_mode=False
+2026-04-12 16:00:22,629 | INFO | app | Decrypt request | cipher_bytes=13 has_salt=True
+2026-04-12 16:00:27,180 | INFO | app | Stego hide | image=1775989827162_sample.jpg output=stego_d2871db3.png

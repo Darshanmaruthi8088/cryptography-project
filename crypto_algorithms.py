@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import json
 import os
 import random
@@ -11,7 +13,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 from config import APP_SECRET_KEY, DEFAULT_PBKDF2_ITERATIONS
-from hash_algorithms import pbkdf2_sha256
+from hash_algorithms import hmac_sha256, pbkdf2_sha256
 
 
 class CryptoError(ValueError):
@@ -60,6 +62,36 @@ def _derive_key_material(
         iterations=iterations,
         dklen=required_len,
     )
+
+
+def _derive_stream_keystream(
+    password: str,
+    salt: bytes,
+    nonce: str,
+    required_len: int,
+    iterations: int,
+) -> bytes:
+    """Derive a fixed PBKDF2 seed and expand it with HMAC counters.
+
+    This keeps PBKDF2 cost stable for large files while still producing
+    deterministic keystream bytes tied to password, salt, and nonce.
+    """
+    if required_len <= 0:
+        return b""
+
+    seed = pbkdf2_sha256(
+        password=password.encode("utf-8"),
+        salt=salt,
+        iterations=iterations,
+        dklen=32,
+    )
+    nonce_bytes = nonce.encode("utf-8")
+    stream = bytearray()
+    counter = 0
+    while len(stream) < required_len:
+        stream.extend(hmac_sha256(seed, nonce_bytes + counter.to_bytes(4, byteorder="big")))
+        counter += 1
+    return bytes(stream[:required_len])
 
 
 def _random_nonce(length: int = 8) -> str:
@@ -175,39 +207,60 @@ def encrypt_binary_payload(
 ) -> Dict[str, object]:
     nonce = _random_nonce()
     salt = os.urandom(8)
-    key_stream = _derive_key_material(
-        password=password, salt=salt, required_len=len(data), iterations=iterations
+    key_stream = _derive_stream_keystream(
+        password=password,
+        salt=salt,
+        nonce=nonce,
+        required_len=len(data),
+        iterations=iterations,
     )
     step1 = vigenere_encrypt_bytes(data, key_stream)
     step2 = xor_cipher_bytes(step1, nonce.encode("utf-8"))
     step3 = rotate_bits_bytes(step2)
 
     return {
-        "version": "CST1",
+        "version": "CST2",
+        "encoding": "base64",
         "nonce": nonce,
         "salt": salt.hex(),
         "iterations": iterations,
-        "cipher_hex": step3.hex(),
+        "cipher_b64": base64.b64encode(step3).decode("ascii"),
     }
 
 
 def decrypt_binary_payload(payload: Dict[str, object], password: str) -> bytes:
-    try:
-        if payload.get("version") != "CST1":
-            raise CryptoError("Unsupported encrypted file format.")
+    version = str(payload.get("version") or "")
+    if version not in {"CST1", "CST2"}:
+        raise CryptoError("Unsupported encrypted file format.")
 
+    try:
         nonce = str(payload["nonce"])
         salt = bytes.fromhex(str(payload["salt"]))
         iterations = int(payload["iterations"])
-        cipher_bytes = bytes.fromhex(str(payload["cipher_hex"]))
-    except (KeyError, ValueError, TypeError) as exc:
+        if version == "CST2":
+            cipher_b64 = payload.get("cipher_b64")
+            if cipher_b64 is None:
+                raise KeyError("cipher_b64")
+            cipher_bytes = base64.b64decode(str(cipher_b64), validate=True)
+        else:
+            cipher_bytes = bytes.fromhex(str(payload["cipher_hex"]))
+    except (KeyError, ValueError, TypeError, binascii.Error) as exc:
         raise CryptoError("Invalid encrypted file payload format.") from exc
 
     step1 = reverse_rotate_bits_bytes(cipher_bytes)
     step2 = xor_cipher_bytes(step1, nonce.encode("utf-8"))
-    key_stream = _derive_key_material(
-        password=password, salt=salt, required_len=len(step2), iterations=iterations
-    )
+    if version == "CST2":
+        key_stream = _derive_stream_keystream(
+            password=password,
+            salt=salt,
+            nonce=nonce,
+            required_len=len(step2),
+            iterations=iterations,
+        )
+    else:
+        key_stream = _derive_key_material(
+            password=password, salt=salt, required_len=len(step2), iterations=iterations
+        )
     return vigenere_decrypt_bytes(step2, key_stream)
 
 
@@ -220,4 +273,3 @@ def parse_encrypted_payload(raw: bytes) -> Dict[str, object]:
         return json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise CryptoError("Encrypted file is not valid JSON payload.") from exc
-
